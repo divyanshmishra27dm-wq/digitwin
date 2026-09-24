@@ -1,0 +1,52 @@
+:root {
+  /* ── Palette ─────────────────────────────────────────── */
+  --navy-950: #0A1122;
+  --navy-900: #101B33;
+  --navy-800: #16264A;
+  --navy-700: #223768;
+  --blue-accent: #3E63DD;
+  --blue-accent-soft: #EAEFFD;
+  --blue-accent-dark: #2E4CB0;
+
+  --background: #F6F7F9;
+  --surface: #FFFFFF;
+  --surface-muted: #EEF1F5;
+  --border: #E2E6EC;
+  --border-strong: #CBD2DC;
+
+  --text-primary: #12172A;
+  --text-secondary: #5B6472;
+  --text-tertiary: #8C93A1;
+  --text-on-dark: #F3F5F9;
+  --text-on-dark-secondary: #A7B1C8;
+
+  --success: #1F8A5C;
+  --success-soft: #E6F4EC;
+  --warning: #A9700F;
+  --warning-soft: #FBF0DD;
+  --danger: #C2422D;
+  --danger-soft: #FBEAE6;
+
+  /* ── Type ────────────────────────────────────────────── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* ── Radius & shadow ─────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(16, 27, 51, 0.06);
+  --shadow-md: 0 4px 16px rgba(16, 27, 51, 0.08);
+  --shadow-lg: 0 16px 40px rgba(16, 27, 51, 0.14);
+
+  /* ── Layout ──────────────────────────────────────────── */
+  --sidebar-width: 248px;
+  --topbar-height: 64px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* This product is designed as a light, executive-grade surface;
+       we intentionally keep it light in both schemes for consistency
+       with the enterprise brief rather than auto-inverting. */
+  }
+}
