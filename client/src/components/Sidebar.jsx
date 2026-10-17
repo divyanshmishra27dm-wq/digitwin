@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   Home, Users2, MessageSquare, UserCircle, LayoutGrid, Sparkles,
-  MessagesSquare, LifeBuoy, BarChart3, Settings, Bot, PlusCircle
+  MessagesSquare, LifeBuoy, BarChart3, Settings, Bot, PlusCircle, Radio
 } from 'lucide-react';
 
 const userLinks = [
@@ -19,6 +19,7 @@ const adminLinks = [
     links: [
       { to: '/admin/twins', label: 'All Twins', icon: Bot, end: true },
       { to: '/admin/twins/create', label: 'Create Twin', icon: Sparkles },
+      { to: '/admin/awareness', label: 'Awareness Radar', icon: Radio },
     ],
   },
   { group: 'Engagement', links: [

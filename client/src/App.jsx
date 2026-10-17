@@ -28,6 +28,7 @@ import Escalations from './pages/admin/Escalations.jsx';
 import Users from './pages/admin/Users.jsx';
 import Analytics from './pages/admin/Analytics.jsx';
 import Settings from './pages/admin/Settings.jsx';
+import AwarenessHub from './pages/admin/AwarenessHub.jsx';
 
 export default function App() {
   return (
@@ -66,6 +67,7 @@ export default function App() {
         <Route path="/admin/escalations" element={<Escalations />} />
         <Route path="/admin/users" element={<Users />} />
         <Route path="/admin/analytics" element={<Analytics />} />
+        <Route path="/admin/awareness" element={<AwarenessHub />} />
         <Route path="/admin/settings" element={<Settings />} />
       </Route>
 

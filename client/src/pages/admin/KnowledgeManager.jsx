@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Search, Pencil, Trash2, Eye, Upload, FileText, Sparkles, Layers } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Pencil, Trash2, Eye, Upload, FileText, Sparkles, Layers, Globe, Link2 } from 'lucide-react';
 import api from '../../services/api.js';
 import EmptyState from '../../components/EmptyState.jsx';
 import ErrorAlert from '../../components/ErrorAlert.jsx';
 import Modal from '../../components/Modal.jsx';
 import DocumentUploader from '../../components/DocumentUploader.jsx';
+import WebLinkIngesterModal from '../../components/WebLinkIngesterModal.jsx';
 
 const EMPTY = { title: '', category: '', summary: '', content: '', tags: '', source: '', sourceType: 'manual' };
 
@@ -21,6 +22,7 @@ export default function KnowledgeManager() {
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showDocUpload, setShowDocUpload] = useState(false);
+  const [showWebModal, setShowWebModal] = useState(false);
   const [previewEntry, setPreviewEntry] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -128,9 +130,12 @@ export default function KnowledgeManager() {
             {twin ? `Documented knowledge base and project memory for ${twin.name}.` : 'What this Twin is grounded in.'}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={() => setShowWebModal(true)}>
+            <Globe size={15} /> Learn from Web Link
+          </button>
           <button className="btn btn-secondary" onClick={() => setShowDocUpload(true)}>
-            <Upload size={15} /> Ingest Documents (PDF/DOCX)
+            <Upload size={15} /> Ingest Documents
           </button>
           <button className="btn btn-primary" onClick={openNew}>
             <Plus size={15} /> Add Knowledge
@@ -197,6 +202,8 @@ export default function KnowledgeManager() {
           {filtered.map((entry) => {
             const isFromCV = entry.sourceType === 'cv_upload';
             const isFromDoc = entry.sourceType === 'document_upload';
+            const isFromWeb = entry.sourceType === 'web_learning';
+            const isAutoAware = entry.sourceType === 'auto_aware_mode';
 
             return (
               <div className="knowledge-entry-card" key={entry._id}>
@@ -238,6 +245,40 @@ export default function KnowledgeManager() {
                         <FileText size={11} /> {entry.source || 'Doc Upload'}
                       </span>
                     )}
+                    {isFromWeb && (
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          padding: '2px 7px',
+                          borderRadius: 4,
+                          background: 'rgba(31, 138, 92, 0.15)',
+                          color: '#1F8A5C',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3,
+                        }}
+                      >
+                        <Globe size={11} /> Web Link Learned
+                      </span>
+                    )}
+                    {isAutoAware && (
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          padding: '2px 7px',
+                          borderRadius: 4,
+                          background: 'rgba(142, 78, 198, 0.15)',
+                          color: '#8E4EC6',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3,
+                        }}
+                      >
+                        <Sparkles size={11} /> Auto Aware Mode
+                      </span>
+                    )}
                   </div>
 
                   <p style={{ margin: '0 0 8px', color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.55 }}>
@@ -272,6 +313,16 @@ export default function KnowledgeManager() {
         </div>
       )}
 
+      {/* Web Link Ingestion Modal */}
+      {showWebModal && (
+        <WebLinkIngesterModal
+          isOpen={showWebModal}
+          onClose={() => setShowWebModal(false)}
+          defaultTwinId={id}
+          onIngested={load}
+        />
+      )}
+
       {/* Document Ingestion Modal */}
       {showDocUpload && (
         <DocumentUploader
@@ -287,13 +338,19 @@ export default function KnowledgeManager() {
       {/* ── Preview Modal ────────────────────────────── */}
       {previewEntry && (
         <Modal title={previewEntry.title} onClose={() => setPreviewEntry(null)}>
-          <div className="flex items-center gap-8 mb-12">
+          <div className="flex items-center gap-8 mb-12 flex-wrap">
             <span className="cat">{previewEntry.category}</span>
             {previewEntry.sourceType === 'cv_upload' && (
               <span className="badge badge-accent" style={{ fontSize: 11 }}>CV Ingested</span>
             )}
             {previewEntry.sourceType === 'document_upload' && (
               <span className="badge badge-info" style={{ fontSize: 11 }}>Document Ingested</span>
+            )}
+            {previewEntry.sourceType === 'web_learning' && (
+              <span className="badge badge-success" style={{ fontSize: 11 }}>Web Learning</span>
+            )}
+            {previewEntry.sourceType === 'auto_aware_mode' && (
+              <span className="badge badge-accent" style={{ fontSize: 11 }}>Auto Aware Mode</span>
             )}
           </div>
 

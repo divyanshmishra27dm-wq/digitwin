@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CircleCheck, GitFork, LayoutGrid, Building2, Globe, Lock, Clock, Send, Users2 } from 'lucide-react';
+import { ArrowLeft, CircleCheck, GitFork, LayoutGrid, Building2, Globe, Lock, Clock, Send, Users2, Link2 } from 'lucide-react';
 import api from '../../services/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import ErrorAlert from '../../components/ErrorAlert.jsx';
 import SkillFlowchart from '../../components/SkillFlowchart.jsx';
 import SummonModal from '../../components/SummonModal.jsx';
+import WebLinkIngesterModal from '../../components/WebLinkIngesterModal.jsx';
 import { groupSkillsByTaxonomy } from '../../data/skillTaxonomy.js';
 
 const EXPERIENCE = [
@@ -25,7 +26,8 @@ export default function TwinProfile() {
   const [requesting, setRequesting] = useState(false);
   const [requestSuccess, setRequestSuccess] = useState('');
   const [skillViewTab, setSkillViewTab] = useState('flowchart');
-  const [showSummonModal, setShowSummonModal] = useState(false); // 'flowchart' | 'chips'
+  const [showSummonModal, setShowSummonModal] = useState(false);
+  const [showWebModal, setShowWebModal] = useState(false);
 
   useEffect(() => {
     api
@@ -191,12 +193,15 @@ export default function TwinProfile() {
         <div className="role">{twin.title} · {twin.organization}</div>
         <div className="tags">{(twin.expertise || []).slice(0, 6).join(' • ')}</div>
         {twin.tagline && <blockquote>"{twin.tagline}"</blockquote>}
-        <div className="flex items-center justify-center gap-10" style={{ marginTop: 8 }}>
+        <div className="flex items-center justify-center gap-10" style={{ marginTop: 8, flexWrap: 'wrap' }}>
           <button className="btn btn-accent" onClick={() => navigate(`/twins/${twin._id}/chat`)}>
             Start Conversation
           </button>
           <button className="btn btn-secondary" onClick={() => setShowSummonModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Users2 size={15} /> Summon in Roundtable
+          </button>
+          <button className="btn btn-secondary" onClick={() => setShowWebModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Link2 size={15} /> Feed Learning Link
           </button>
         </div>
       </div>
@@ -308,6 +313,17 @@ export default function TwinProfile() {
         isOpen={showSummonModal}
         onClose={() => setShowSummonModal(false)}
         initialSelectedTwinId={twin._id}
+      />
+
+      <WebLinkIngesterModal
+        isOpen={showWebModal}
+        onClose={() => setShowWebModal(false)}
+        defaultTwinId={twin._id}
+        onIngested={(data) => {
+          if (data.twin) {
+            setTwin((prev) => ({ ...prev, expertise: data.twin.expertise }));
+          }
+        }}
       />
     </div>
   );

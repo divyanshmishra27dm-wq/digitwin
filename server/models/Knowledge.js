@@ -11,7 +11,7 @@ const knowledgeSchema = new mongoose.Schema(
     source: { type: String, default: '' },
     sourceType: {
       type: String,
-      enum: ['manual', 'document', 'cv_upload', 'document_upload', 'system'],
+      enum: ['manual', 'document', 'cv_upload', 'document_upload', 'web_learning', 'auto_aware_mode', 'system'],
       default: 'manual',
     },
     chunkIndex: { type: Number, default: 0 },

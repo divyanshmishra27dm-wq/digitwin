@@ -334,9 +334,23 @@ ul { margin: 0; padding: 0; list-style: none; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modal-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
 
-.modal-header { margin-bottom: 18px; }
-.modal-header h3 { font-size: 18px; font-weight: 700; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+.modal-close-btn:hover {
+  background: var(--border-strong, #CBD2DC) !important;
+  color: var(--text-primary, #12172A) !important;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
 
 /* ── Status dot ────────────────────────────────────────── */
 

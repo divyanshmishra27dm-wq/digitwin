@@ -299,12 +299,18 @@ export const SKILL_TAXONOMY = [
           'Generative AI',
           'Prompt Engineering',
           'RAG (Retrieval-Augmented Generation)',
+          'Agentic RAG',
+          'Model Context Protocol (MCP)',
+          'Claude 3.7 Hybrid Reasoning',
+          'DeepSeek-R1 Reasoning',
+          'LangGraph Multi-Agent Workflows',
           'LangChain & LlamaIndex',
           'Fine-Tuning LLMs (LoRA/QLoRA)',
           'Vector Databases (Pinecone/Milvus/Chroma)',
           'LLM Guardrails & Evaluation',
           'Agentic Workflows & Multi-Agent Systems',
-          'Embeddings & Semantic Search'
+          'Embeddings & Semantic Search',
+          'Self-Corrective Retrieval'
         ]
       },
       {

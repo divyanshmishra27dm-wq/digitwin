@@ -15,6 +15,7 @@ const escalationRoutes = require('./routes/escalations');
 const analyticsRoutes = require('./routes/analytics');
 const userRoutes = require('./routes/users');
 const roundtableRoutes = require('./routes/roundtables');
+const awarenessRoutes = require('./routes/awareness');
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use('/api/escalations', escalationRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/roundtables', roundtableRoutes);
+app.use('/api/awareness', awarenessRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
