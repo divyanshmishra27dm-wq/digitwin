@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: digitwin
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: LITELLM_BASE_URL
+        value: https://litellm.niit.com/v1
+      - key: LITELLM_API_KEY
+        sync: false
+      - key: LITELLM_MODEL
+        value: azure-gpt-l1
+      - key: CLIENT_URL
+        value: "*"

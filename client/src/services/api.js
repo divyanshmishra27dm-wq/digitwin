@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
+const rawBaseUrl = import.meta.env.VITE_API_URL || '';
+const cleanBaseUrl = rawBaseUrl.replace(/\/$/, '');
+const baseURL = cleanBaseUrl ? (cleanBaseUrl.endsWith('/api') ? cleanBaseUrl : `${cleanBaseUrl}/api`) : '/api';
+
+const api = axios.create({ baseURL });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('ndt_token');
