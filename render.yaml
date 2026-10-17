@@ -20,3 +20,5 @@ services:
         value: azure-gpt-l1
       - key: CLIENT_URL
         value: "*"
+      - key: SHARED_ACCESS_KEY
+        value: ndt_twin_access_key_99

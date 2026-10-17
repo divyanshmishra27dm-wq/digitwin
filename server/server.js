@@ -18,6 +18,7 @@ const analyticsRoutes = require('./routes/analytics');
 const userRoutes = require('./routes/users');
 const roundtableRoutes = require('./routes/roundtables');
 const awarenessRoutes = require('./routes/awareness');
+const sharedRoutes = require('./routes/shared');
 
 const app = express();
 
@@ -62,6 +63,8 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/roundtables', roundtableRoutes);
 app.use('/api/awareness', awarenessRoutes);
+app.use('/api/shared', sharedRoutes);
+app.use('/api/twins/shared', sharedRoutes);
 
 // Serve frontend static build in production (single-service Render deployment)
 const clientDistPath = path.join(__dirname, '../client/dist');
