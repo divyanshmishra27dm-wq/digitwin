@@ -416,6 +416,10 @@ async function seed() {
     console.log('[seed] Updated Dr. Aarav Kapoor Twin with Global visibility');
   }
 
+  // ── Bank RM 4 Digital Twins (All Visibility) ───────────────
+  const { seedBankTwins } = require('./createBankTwins');
+  await seedBankTwins(false);
+
   console.log('\n[seed] Done. NIIT Internal Innovation POC seed complete.');
   console.log('[seed] Predefined users & departmental/global twins created successfully.');
   process.exit(0);

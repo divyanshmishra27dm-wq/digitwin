@@ -18,6 +18,10 @@ const twinSchema = new mongoose.Schema(
 
     expertise: [{ type: String, trim: true }],
 
+    interactionFrequency: { type: String, default: '', trim: true },
+    usualChannel: { type: String, default: '', trim: true },
+    typicalInteractions: [{ type: String, trim: true }],
+
     communicationStyle: [{ type: String, trim: true }],
     thinkingPatterns: [{ type: String, trim: true }],
     responseLength: { type: String, enum: ['concise', 'balanced', 'detailed'], default: 'balanced' },

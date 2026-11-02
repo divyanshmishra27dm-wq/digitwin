@@ -5,7 +5,8 @@ const { generateTwinResponse } = require('../services/aiService');
 
 /**
  * GET /api/shared/twins
- * Returns all digital twins regardless of department ID.
+ * Returns digital twins allocated to the caller's API Key.
+ * If the caller holds a scoped API Key, only the models assigned to that key are returned.
  * Optional query params:
  *   - ?dept=Engineering (filter by department if desired)
  *   - ?status=all (defaults to published; pass 'all' to include drafts)
@@ -14,8 +15,15 @@ const { generateTwinResponse } = require('../services/aiService');
 exports.getAllSharedTwins = async (req, res, next) => {
   try {
     const { dept, status, search } = req.query;
+    const apiKeyDoc = req.apiKeyDoc;
 
     const filter = {};
+
+    // 1. Enforce API Key Model Allocation Boundary
+    if (apiKeyDoc && !apiKeyDoc.isUniversal) {
+      filter._id = { $in: apiKeyDoc.allowedTwinIds || [] };
+    }
+
     if (status && status !== 'all') {
       filter.status = status;
     } else if (!status) {
@@ -66,6 +74,9 @@ exports.getAllSharedTwins = async (req, res, next) => {
           titlePersonas: twin.titlePersonas || [],
           education: twin.education || [],
           experience: twin.experience || [],
+          interactionFrequency: twin.interactionFrequency || '',
+          usualChannel: twin.usualChannel || '',
+          typicalInteractions: twin.typicalInteractions || [],
           knowledgeCount,
           conversationCount,
           createdAt: twin.createdAt,
@@ -78,8 +89,13 @@ exports.getAllSharedTwins = async (req, res, next) => {
 
     res.json({
       success: true,
-      accessLevel: 'Universal Shared Access (All Departments)',
-      totalTwins: twinsWithCounts.length,
+      accessLevel: apiKeyDoc?.isUniversal
+        ? 'Universal Shared Access (All Models)'
+        : `Key-Allocated Access (${apiKeyDoc?.name || 'Scoped Key'})`,
+      keyName: apiKeyDoc?.name || 'Shared Key',
+      isScopedToKey: !(apiKeyDoc?.isUniversal),
+      allocatedModelsCount: apiKeyDoc?.isUniversal ? twinsWithCounts.length : (apiKeyDoc?.allowedTwinIds?.length || 0),
+      returnedCount: twinsWithCounts.length,
       departments,
       twins: twinsWithCounts,
     });
@@ -90,11 +106,28 @@ exports.getAllSharedTwins = async (req, res, next) => {
 
 /**
  * GET /api/shared/twins/:id
- * Returns single digital twin by ID with all knowledge items regardless of department.
+ * Returns single digital twin by ID with all knowledge items.
+ * Validates that the requested model is allocated to the caller's API key.
  */
 exports.getSharedTwinById = async (req, res, next) => {
   try {
-    const twin = await Twin.findById(req.params.id)
+    const apiKeyDoc = req.apiKeyDoc;
+    const requestedId = req.params.id;
+
+    // Enforce API Key Model Allocation Boundary
+    if (apiKeyDoc && !apiKeyDoc.isUniversal) {
+      const isAllocated = (apiKeyDoc.allowedTwinIds || []).includes(requestedId);
+      if (!isAllocated) {
+        return res.status(403).json({
+          success: false,
+          error: 'Forbidden',
+          message: `Access denied. This Digital Twin is not allocated to your API access key ("${apiKeyDoc.name}").`,
+          allocatedTwinIds: apiKeyDoc.allowedTwinIds,
+        });
+      }
+    }
+
+    const twin = await Twin.findById(requestedId)
       .populate('createdBy', 'name email dept')
       .lean();
 
@@ -111,7 +144,7 @@ exports.getSharedTwinById = async (req, res, next) => {
 
     res.json({
       success: true,
-      accessLevel: 'Universal Shared Access',
+      accessLevel: apiKeyDoc?.isUniversal ? 'Universal Access' : `Allocated to ${apiKeyDoc?.name}`,
       twin: {
         id: twin._id,
         name: twin.name,
@@ -130,6 +163,9 @@ exports.getSharedTwinById = async (req, res, next) => {
         titlePersonas: twin.titlePersonas || [],
         education: twin.education || [],
         experience: twin.experience || [],
+        interactionFrequency: twin.interactionFrequency || '',
+        usualChannel: twin.usualChannel || '',
+        typicalInteractions: twin.typicalInteractions || [],
         knowledgeCount: knowledgeItems.length,
         conversationCount,
         knowledge: knowledgeItems,
@@ -144,18 +180,32 @@ exports.getSharedTwinById = async (req, res, next) => {
 
 /**
  * POST /api/shared/twins/chat
- * Send a prompt or query to any twin across any department using the shared key.
+ * Send a prompt or query to a twin using the shared key.
+ * Enforces that the requested twin is allocated to the caller's API key.
  * Body: { "twinId": "...", "message": "...", "history": [...] }
  */
 exports.chatSharedTwin = async (req, res, next) => {
   try {
     const { twinId, message, history = [] } = req.body;
+    const apiKeyDoc = req.apiKeyDoc;
 
     if (!twinId || !message || !message.trim()) {
       return res.status(400).json({
         success: false,
         message: 'twinId and message are required in request body.',
       });
+    }
+
+    // Enforce API Key Model Allocation Boundary
+    if (apiKeyDoc && !apiKeyDoc.isUniversal) {
+      const isAllocated = (apiKeyDoc.allowedTwinIds || []).includes(twinId.toString());
+      if (!isAllocated) {
+        return res.status(403).json({
+          success: false,
+          error: 'Forbidden',
+          message: `Access denied. The Digital Twin requested is not allocated to your API access key ("${apiKeyDoc.name}").`,
+        });
+      }
     }
 
     const twin = await Twin.findById(twinId);
@@ -165,7 +215,7 @@ exports.chatSharedTwin = async (req, res, next) => {
 
     // Virtual user context bypassing department boundaries
     const callerContext = {
-      name: 'External Evaluator / Shared User',
+      name: apiKeyDoc?.name ? `API Client (${apiKeyDoc.name})` : 'External Evaluator / Shared User',
       dept: 'Universal Access',
       title: 'Partner',
       role: 'external',
@@ -175,6 +225,7 @@ exports.chatSharedTwin = async (req, res, next) => {
 
     res.json({
       success: true,
+      apiKeyName: apiKeyDoc?.name || 'Shared Key',
       twin: {
         id: twin._id,
         name: twin.name,

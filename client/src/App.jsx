@@ -14,6 +14,8 @@ import ConversationDetail from './pages/user/ConversationDetail.jsx';
 import Profile from './pages/user/Profile.jsx';
 import RoundtableList from './pages/user/RoundtableList.jsx';
 import RoundtableRoom from './pages/user/RoundtableRoom.jsx';
+import CallsList from './pages/user/CallsList.jsx';
+import CallRoom from './pages/user/CallRoom.jsx';
 
 import Overview from './pages/admin/Overview.jsx';
 import AdminTwinsList from './pages/admin/TwinsList.jsx';
@@ -29,6 +31,7 @@ import Users from './pages/admin/Users.jsx';
 import Analytics from './pages/admin/Analytics.jsx';
 import Settings from './pages/admin/Settings.jsx';
 import AwarenessHub from './pages/admin/AwarenessHub.jsx';
+import ApiKeys from './pages/admin/ApiKeys.jsx';
 
 export default function App() {
   return (
@@ -48,6 +51,8 @@ export default function App() {
         <Route path="/twins/:id/preview" element={<PreviewTwin userMode={true} />} />
         <Route path="/roundtable" element={<RoundtableList />} />
         <Route path="/roundtable/:id" element={<RoundtableRoom />} />
+        <Route path="/calls" element={<CallsList />} />
+        <Route path="/calls/:id" element={<CallRoom />} />
         <Route path="/conversations" element={<Conversations />} />
         <Route path="/conversations/:id" element={<ConversationDetail />} />
         <Route path="/profile" element={<Profile />} />
@@ -66,6 +71,7 @@ export default function App() {
         <Route path="/admin/conversations" element={<AdminConversations />} />
         <Route path="/admin/escalations" element={<Escalations />} />
         <Route path="/admin/users" element={<Users />} />
+        <Route path="/admin/api-keys" element={<ApiKeys />} />
         <Route path="/admin/analytics" element={<Analytics />} />
         <Route path="/admin/awareness" element={<AwarenessHub />} />
         <Route path="/admin/settings" element={<Settings />} />

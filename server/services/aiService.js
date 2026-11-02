@@ -17,7 +17,7 @@ async function generateTwinResponse(twin, question, history = [], user = null) {
   const knowledgeEntries = await retrieveRelevantKnowledge(twin._id, question, history);
 
   if (isDemoMode()) {
-    return getDemoResponse(question, knowledgeEntries, history);
+    return getDemoResponse(question, knowledgeEntries, history, twin);
   }
 
   const systemPrompt = buildSystemPrompt(twin, knowledgeEntries, user);
@@ -74,7 +74,7 @@ async function generateTwinResponse(twin, question, history = [], user = null) {
     return validateResponse(parsed, knowledgeEntries);
   } catch (err) {
     console.error('[aiService] LLM call failed, falling back to demo response:', err.message);
-    return getDemoResponse(question, knowledgeEntries, history);
+    return getDemoResponse(question, knowledgeEntries, history, twin);
   }
 }
 

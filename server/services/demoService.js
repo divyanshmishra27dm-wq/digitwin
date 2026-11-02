@@ -116,8 +116,25 @@ const DEMO_QA = [
 const FALLBACK_ANSWER =
   "I don't have enough documented information in this Twin's knowledge base to answer that accurately.";
 
-function getDemoResponse(question, knowledgeEntries = [], history = []) {
+function getDemoResponse(question, knowledgeEntries = [], history = [], twin = null) {
   const q = question.toLowerCase();
+
+  // Handle greetings dynamically for any twin
+  const isGreeting = ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'who are you', 'introduce'].some(
+    (k) => q.trim() === k || q.startsWith(k + ' ') || q.includes(' ' + k) || q.includes('who are you') || q.includes('introduce')
+  );
+  if (isGreeting && twin && twin.name !== 'Divyansh Mishra') {
+    const topicList = (knowledgeEntries || []).map((k) => k.title).slice(0, 4);
+    const topicsText = topicList.length > 0 ? ` You can ask me about: ${topicList.join(', ')}.` : '';
+    return {
+      answer: `Hello! I am the AI Digital Twin representing **${twin.name}**, ${twin.title} at ${twin.organization || 'NIIT Ltd.'}.${topicsText} How can I assist you today?`,
+      responseType: 'documented',
+      confidence: 'high',
+      sources: topicList.map((t) => ({ title: t })),
+      canEscalate: false,
+      suggestedOptions: (twin.expertise || []).slice(0, 4),
+    };
+  }
 
   // If question is a short follow-up / pronoun question (e.g. "was it useful?", "tell me more"), look up the last discussed topic
   let searchContext = q;

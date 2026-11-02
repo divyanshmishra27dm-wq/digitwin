@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CircleCheck, GitFork, LayoutGrid, Building2, Globe, Lock, Clock, Send, Users2, Link2 } from 'lucide-react';
+import { ArrowLeft, CircleCheck, GitFork, LayoutGrid, Building2, Globe, Lock, Clock, Send, Users2, Link2, PhoneCall, Zap, MessageSquare, Key } from 'lucide-react';
 import api from '../../services/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import ErrorAlert from '../../components/ErrorAlert.jsx';
 import SkillFlowchart from '../../components/SkillFlowchart.jsx';
 import SummonModal from '../../components/SummonModal.jsx';
+import CallModal from '../../components/CallModal.jsx';
 import WebLinkIngesterModal from '../../components/WebLinkIngesterModal.jsx';
 import { groupSkillsByTaxonomy } from '../../data/skillTaxonomy.js';
 
@@ -28,6 +29,7 @@ export default function TwinProfile() {
   const [skillViewTab, setSkillViewTab] = useState('flowchart');
   const [showSummonModal, setShowSummonModal] = useState(false);
   const [showWebModal, setShowWebModal] = useState(false);
+  const [showCallModal, setShowCallModal] = useState(false);
 
   useEffect(() => {
     api
@@ -194,6 +196,13 @@ export default function TwinProfile() {
         <div className="tags">{(twin.expertise || []).slice(0, 6).join(' • ')}</div>
         {twin.tagline && <blockquote>"{twin.tagline}"</blockquote>}
         <div className="flex items-center justify-center gap-10" style={{ marginTop: 8, flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-accent"
+            onClick={() => setShowCallModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#10b981', borderColor: '#10b981' }}
+          >
+            <PhoneCall size={15} /> Voice Team Call
+          </button>
           <button className="btn btn-accent" onClick={() => navigate(`/twins/${twin._id}/chat`)}>
             Start Conversation
           </button>
@@ -210,6 +219,130 @@ export default function TwinProfile() {
         <div className="section-title" style={{ marginBottom: 12 }}>About</div>
         <p className="text-muted" style={{ lineHeight: 1.7, fontSize: 14.5 }}>{twin.bio}</p>
       </div>
+
+      {/* Relationship Manager (RM) Interaction Blueprint */}
+      {(twin.interactionFrequency || twin.usualChannel || (twin.typicalInteractions && twin.typicalInteractions.length > 0)) && (
+        <div className="card mt-24" style={{ borderLeft: '4px solid #10b981', background: 'var(--surface)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+            <div>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Zap size={18} style={{ color: '#10b981' }} />
+                Branch Relationship Manager (RM) Interaction Blueprint
+              </div>
+              <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                Field cadence, operational communication channels, and typical collaborative scenarios.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {twin.interactionFrequency && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    color: '#059669',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                  }}
+                  title="Interaction Frequency with RM"
+                >
+                  <Clock size={13} /> Interacts: {twin.interactionFrequency}
+                </span>
+              )}
+
+              {twin.usualChannel && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    color: '#2563eb',
+                    border: '1px solid rgba(59, 130, 246, 0.25)',
+                  }}
+                  title="Primary Communication Channels"
+                >
+                  <MessageSquare size={13} /> Channel: {twin.usualChannel}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {twin.typicalInteractions && twin.typicalInteractions.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>
+                Typical Interactions & Scenarios:
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {twin.typicalInteractions.map((item, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      background: 'var(--surface-muted, #f8fafc)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 8,
+                      padding: '10px 14px',
+                      fontSize: '0.88rem',
+                      lineHeight: 1.5,
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: '50%',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#059669',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        flexShrink: 0,
+                        marginTop: 1,
+                      }}
+                    >
+                      {idx + 1}
+                    </span>
+                    <div>{item}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div
+            style={{
+              marginTop: 14,
+              paddingTop: 10,
+              borderTop: '1px dashed var(--border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '0.76rem',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Key size={12} style={{ color: '#059669' }} /> Accessible via Universal API Key: <code style={{ background: 'var(--surface-muted)', padding: '2px 6px', borderRadius: 4, fontWeight: 600 }}>ndt_twin_access_key_99</code>
+            </span>
+            <span>API Route: <code style={{ background: 'var(--surface-muted)', padding: '2px 6px', borderRadius: 4 }}>POST /api/shared/twins/chat</code></span>
+          </div>
+        </div>
+      )}
 
       {/* Areas of Expertise & Skill Flowchart */}
       <div className="mt-32">
@@ -312,6 +445,12 @@ export default function TwinProfile() {
       <SummonModal
         isOpen={showSummonModal}
         onClose={() => setShowSummonModal(false)}
+        initialSelectedTwinId={twin._id}
+      />
+
+      <CallModal
+        isOpen={showCallModal}
+        onClose={() => setShowCallModal(false)}
         initialSelectedTwinId={twin._id}
       />
 

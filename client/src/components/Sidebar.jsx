@@ -1,12 +1,13 @@
 import { NavLink } from 'react-router-dom';
 import {
   Home, Users2, MessageSquare, UserCircle, LayoutGrid, Sparkles,
-  MessagesSquare, LifeBuoy, BarChart3, Settings, Bot, PlusCircle, Radio
+  MessagesSquare, LifeBuoy, BarChart3, Settings, Bot, PlusCircle, Radio, PhoneCall, Key
 } from 'lucide-react';
 
 const userLinks = [
   { to: '/', label: 'Home', icon: Home, end: true },
   { to: '/twins', label: 'Digital Twins', icon: Bot, end: true },
+  { to: '/calls', label: 'Team Calls & Debate', icon: PhoneCall },
   { to: '/roundtable', label: 'Twin Roundtable', icon: Users2 },
   { to: '/twins/create', label: 'Create Twin', icon: PlusCircle },
   { to: '/conversations', label: 'My Conversations', icon: MessageSquare },
@@ -28,6 +29,7 @@ const adminLinks = [
   ] },
   { group: 'System', links: [
     { to: '/admin/users', label: 'Users', icon: Users2 },
+    { to: '/admin/api-keys', label: 'API Access Keys', icon: Key },
     { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
     { to: '/admin/settings', label: 'Settings', icon: Settings },
   ] },

@@ -88,7 +88,28 @@ export default function TwinCard({ twin }) {
       <h3>{twin.name}</h3>
       <div className="role">{twin.title}</div>
       <div className="org">{twin.organization}</div>
-      <div className="tags">{(twin.expertise || []).slice(0, 3).join(' • ')}</div>
+      {twin.interactionFrequency && (
+        <div
+          style={{
+            fontSize: '0.72rem',
+            color: '#059669',
+            background: 'rgba(16, 185, 129, 0.08)',
+            border: '1px solid rgba(16, 185, 129, 0.2)',
+            padding: '2px 8px',
+            borderRadius: 6,
+            fontWeight: 600,
+            marginTop: 6,
+            marginBottom: 6,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            alignSelf: 'center',
+          }}
+          title={`RM Interaction Frequency: ${twin.interactionFrequency}`}
+        >
+          <span>⚡ RM: {twin.interactionFrequency}</span>
+        </div>
+      )}
 
       {twin.status === 'published' && (
         <div className="avail" style={{ marginTop: 'auto', marginBottom: 12 }}>

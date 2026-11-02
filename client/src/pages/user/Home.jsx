@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Sparkles } from 'lucide-react';
+import { Search, Sparkles, PhoneCall } from 'lucide-react';
 import api from '../../services/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import TwinCard from '../../components/TwinCard.jsx';
@@ -7,6 +7,7 @@ import { SkeletonCard } from '../../components/SkeletonCard.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import ErrorAlert from '../../components/ErrorAlert.jsx';
 import SummonModal from '../../components/SummonModal.jsx';
+import CallModal from '../../components/CallModal.jsx';
 
 function greeting() {
   const h = new Date().getHours();
@@ -22,6 +23,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showSummonModal, setShowSummonModal] = useState(false);
+  const [showCallModal, setShowCallModal] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -92,13 +94,22 @@ export default function Home() {
             Put any strategic or technical problem into chat and summon multiple Digital Twins (e.g. AI & Engineering, Product, Security). Watch them discuss, evaluate trade-offs, and synthesize an actionable blueprint.
           </p>
         </div>
-        <button
-          className="btn btn-accent"
-          onClick={() => setShowSummonModal(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontSize: '0.9rem', flexShrink: 0 }}
-        >
-          Summon Roundtable <Sparkles size={16} />
-        </button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-accent"
+            onClick={() => setShowCallModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontSize: '0.9rem', flexShrink: 0, background: '#10b981', borderColor: '#10b981' }}
+          >
+            <PhoneCall size={16} /> Live Team Call
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setShowSummonModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontSize: '0.9rem', flexShrink: 0 }}
+          >
+            Summon Roundtable <Sparkles size={16} />
+          </button>
+        </div>
       </div>
 
       <div className="section-title mt-32" style={{ marginBottom: 18 }}>
@@ -125,6 +136,11 @@ export default function Home() {
       <SummonModal
         isOpen={showSummonModal}
         onClose={() => setShowSummonModal(false)}
+      />
+
+      <CallModal
+        isOpen={showCallModal}
+        onClose={() => setShowCallModal(false)}
       />
     </div>
   );
