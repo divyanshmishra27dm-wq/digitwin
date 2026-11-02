@@ -36,6 +36,20 @@ export default function ApiKeys() {
   const [visibleKeys, setVisibleKeys] = useState({});
   const [copiedId, setCopiedId] = useState(null);
 
+  const getApiHost = () => {
+    if (import.meta.env.VITE_API_URL) {
+      const clean = import.meta.env.VITE_API_URL.replace(/\/+$/, '').replace(/\/api$/, '');
+      if (clean) return clean;
+    }
+    if (typeof window !== 'undefined' && window.location.origin) {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:5004';
+      }
+      return window.location.origin;
+    }
+    return 'https://digitwin-app.onrender.com';
+  };
+
   // Load API Keys & All Available Twins
   const loadData = async () => {
     setLoading(true);
@@ -781,13 +795,13 @@ export default function ApiKeys() {
               </p>
               <div style={{ position: 'relative' }}>
                 <pre style={{ background: '#0f172a', color: '#f8fafc', padding: '12px 14px', borderRadius: 8, fontSize: '0.8rem', overflowX: 'auto', margin: 0 }}>
-{`curl -X GET "http://localhost:5004/api/shared/twins" \\
+{`curl -X GET "${getApiHost()}/api/shared/twins" \\
   -H "x-api-key: ${activeCurlKey.key}"`}
                 </pre>
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
-                  onClick={() => copyToClipboard(`curl -X GET "http://localhost:5004/api/shared/twins" \\\n  -H "x-api-key: ${activeCurlKey.key}"`, 'curl1')}
+                  onClick={() => copyToClipboard(`curl -X GET "${getApiHost()}/api/shared/twins" \\\n  -H "x-api-key: ${activeCurlKey.key}"`, 'curl1')}
                   style={{ position: 'absolute', top: 8, right: 8, fontSize: '0.72rem', padding: '3px 8px' }}
                 >
                   {copiedId === 'curl1' ? 'Copied!' : 'Copy'}
@@ -804,7 +818,7 @@ export default function ApiKeys() {
               </p>
               <div style={{ position: 'relative' }}>
                 <pre style={{ background: '#0f172a', color: '#f8fafc', padding: '12px 14px', borderRadius: 8, fontSize: '0.8rem', overflowX: 'auto', margin: 0 }}>
-{`curl -X POST "http://localhost:5004/api/shared/twins/chat" \\
+{`curl -X POST "${getApiHost()}/api/shared/twins/chat" \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: ${activeCurlKey.key}" \\
   -d '{
@@ -815,7 +829,7 @@ export default function ApiKeys() {
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
-                  onClick={() => copyToClipboard(`curl -X POST "http://localhost:5004/api/shared/twins/chat" \\\n  -H "Content-Type: application/json" \\\n  -H "x-api-key: ${activeCurlKey.key}" \\\n  -d '{\n    "twinId": "${activeCurlKey.twins?.[0]?._id || '<TWIN_ID>'}",\n    "message": "Hi, can you explain the typical onboarding process?"\n  }'`, 'curl2')}
+                  onClick={() => copyToClipboard(`curl -X POST "${getApiHost()}/api/shared/twins/chat" \\\n  -H "Content-Type: application/json" \\\n  -H "x-api-key: ${activeCurlKey.key}" \\\n  -d '{\n    "twinId": "${activeCurlKey.twins?.[0]?._id || '<TWIN_ID>'}",\n    "message": "Hi, can you explain the typical onboarding process?"\n  }'`, 'curl2')}
                   style={{ position: 'absolute', top: 8, right: 8, fontSize: '0.72rem', padding: '3px 8px' }}
                 >
                   {copiedId === 'curl2' ? 'Copied!' : 'Copy'}
