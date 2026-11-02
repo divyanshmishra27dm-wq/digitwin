@@ -337,9 +337,9 @@ export default function TwinProfile() {
             }}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Key size={12} style={{ color: '#059669' }} /> Accessible via Universal API Key: <code style={{ background: 'var(--surface-muted)', padding: '2px 6px', borderRadius: 4, fontWeight: 600 }}>ndt_twin_access_key_99</code>
+              <Key size={12} style={{ color: '#059669' }} /> Shared API Key: <code style={{ background: 'var(--surface-muted)', padding: '2px 6px', borderRadius: 4, fontWeight: 600 }}>ndt_twin_access_key_99</code>
             </span>
-            <span>API Route: <code style={{ background: 'var(--surface-muted)', padding: '2px 6px', borderRadius: 4 }}>POST /api/shared/twins/chat</code></span>
+            <span>Live Endpoint: <code style={{ background: 'var(--surface-muted)', padding: '2px 6px', borderRadius: 4 }}>https://digitwin-api.onrender.com/api/shared/twins/chat</code></span>
           </div>
         </div>
       )}

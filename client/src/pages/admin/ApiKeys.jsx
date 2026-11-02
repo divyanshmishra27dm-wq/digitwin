@@ -35,19 +35,13 @@ export default function ApiKeys() {
   // Key Visibility & Copy state
   const [visibleKeys, setVisibleKeys] = useState({});
   const [copiedId, setCopiedId] = useState(null);
+  const [selectedEnv, setSelectedEnv] = useState('render'); // 'render' | 'local'
+  const [snippetFormat, setSnippetFormat] = useState('curl'); // 'curl' | 'js' | 'python'
 
   const getApiHost = () => {
-    if (import.meta.env.VITE_API_URL) {
-      const clean = import.meta.env.VITE_API_URL.replace(/\/+$/, '').replace(/\/api$/, '');
-      if (clean) return clean;
-    }
-    if (typeof window !== 'undefined' && window.location.origin) {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:5004';
-      }
-      return window.location.origin;
-    }
-    return 'https://digitwin-app.onrender.com';
+    return selectedEnv === 'render'
+      ? 'https://digitwin-api.onrender.com'
+      : 'http://localhost:5004';
   };
 
   // Load API Keys & All Available Twins
@@ -280,13 +274,16 @@ export default function ApiKeys() {
                 <span style={{ background: '#3b82f6', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: 12, textTransform: 'uppercase' }}>
                   Super Admin / All Models
                 </span>
+                <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: 12 }}>
+                  Render Production: https://digitwin-api.onrender.com
+                </span>
               </div>
               <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                System-level environment key configured in <code>.env</code>. Grants universal access across all {masterKey.allocatedCount} published Digital Twins without model filtering.
+                System-level environment variable (<code>SHARED_ACCESS_KEY</code>) set on Render and local <code>.env</code>. Grants universal access across all {masterKey.allocatedCount} published Digital Twins without model filtering.
               </p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <code style={{ background: 'var(--surface-muted, #f1f5f9)', padding: '6px 12px', borderRadius: 6, fontSize: '0.82rem', fontWeight: 600, color: '#2563eb', border: '1px solid var(--border)' }}>
                 {visibleKeys['master'] ? masterKey.key : '••••••••••••••••••••••••'}
               </code>
@@ -306,6 +303,22 @@ export default function ApiKeys() {
               >
                 {copiedId === 'master' ? <Check size={14} style={{ color: '#10b981' }} /> : <Copy size={14} />}
                 {copiedId === 'master' ? 'Copied!' : 'Copy'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-accent btn-sm"
+                onClick={() => {
+                  setActiveCurlKey({
+                    name: 'Master Universal Key (SHARED_ACCESS_KEY)',
+                    key: masterKey.key,
+                    isUniversal: true,
+                    twins: allTwins,
+                  });
+                  setShowCurlModal(true);
+                }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: '0.78rem' }}
+              >
+                <Terminal size={14} /> View cURL Snippets
               </button>
             </div>
           </div>
@@ -765,16 +778,19 @@ export default function ApiKeys() {
           <div
             className="card"
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: 700, width: '92%', maxHeight: '90vh', overflowY: 'auto', padding: 24 }}
+            style={{ maxWidth: 740, width: '94%', maxHeight: '92vh', overflowY: 'auto', padding: 24 }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
+            {/* Modal Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
               <div>
-                <h3 style={{ margin: '0 0 2px 0', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Terminal size={20} style={{ color: '#3b82f6' }} />
-                  API Integration & Curl Snippets: {activeCurlKey.name}
+                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Terminal size={22} style={{ color: '#3b82f6' }} />
+                  API Integration Guide: {activeCurlKey.name}
                 </h3>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                  This key is scoped to exactly {(activeCurlKey.twins || []).length} digital twin models.
+                  {activeCurlKey.isUniversal
+                    ? `Universal master key with access to all ${allTwins.length} digital twin models.`
+                    : `Scoped key allocated to exactly ${(activeCurlKey.twins || []).length} digital twin model(s).`}
                 </span>
               </div>
               <button
@@ -786,54 +802,196 @@ export default function ApiKeys() {
               </button>
             </div>
 
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
-                1. Retrieve Only Allocated Digital Twins
+            {/* Target Host Environment & Language Selectors */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 18, background: 'var(--surface-muted)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
+              {/* Host Switcher */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Target Host:</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedEnv('render')}
+                  className={`btn btn-sm ${selectedEnv === 'render' ? 'btn-accent' : 'btn-ghost'}`}
+                  style={{ fontSize: '0.74rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 5 }}
+                >
+                  <Globe size={13} /> Render Cloud (digitwin-api.onrender.com)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedEnv('local')}
+                  className={`btn btn-sm ${selectedEnv === 'local' ? 'btn-accent' : 'btn-ghost'}`}
+                  style={{ fontSize: '0.74rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 5 }}
+                >
+                  <Terminal size={13} /> Localhost (:5004)
+                </button>
+              </div>
+
+              {/* Format Switcher */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                {['curl', 'js', 'python'].map((fmt) => (
+                  <button
+                    key={fmt}
+                    type="button"
+                    onClick={() => setSnippetFormat(fmt)}
+                    style={{
+                      fontSize: '0.74rem',
+                      fontWeight: 600,
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      border: 'none',
+                      cursor: 'pointer',
+                      background: snippetFormat === fmt ? '#3b82f6' : 'transparent',
+                      color: snippetFormat === fmt ? '#fff' : 'var(--text-secondary)',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {fmt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Step 1: List Filtered / Showcase Twins */}
+            <div style={{ marginBottom: 22 }}>
+              <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#3b82f6', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.74rem', fontWeight: 700 }}>1</span>
+                Retrieve Showcased Digital Twins
               </div>
               <p style={{ margin: '0 0 8px 0', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                Calls the shared showcase endpoint. Response will only contain the models assigned to this key.
+                {activeCurlKey.isUniversal
+                  ? 'Returns all published digital twins in the system.'
+                  : `Only returns the ${(activeCurlKey.twins || []).length} digital twins assigned to this key.`}
               </p>
               <div style={{ position: 'relative' }}>
-                <pre style={{ background: '#0f172a', color: '#f8fafc', padding: '12px 14px', borderRadius: 8, fontSize: '0.8rem', overflowX: 'auto', margin: 0 }}>
-{`curl -X GET "${getApiHost()}/api/shared/twins" \\
+                <pre style={{ background: '#0f172a', color: '#f8fafc', padding: '12px 14px', borderRadius: 8, fontSize: '0.78rem', overflowX: 'auto', margin: 0, lineHeight: 1.5 }}>
+{snippetFormat === 'curl' && `curl -X GET "${getApiHost()}/api/shared/twins" \\
   -H "x-api-key: ${activeCurlKey.key}"`}
+{snippetFormat === 'js' && `// JavaScript Fetch
+const res = await fetch('${getApiHost()}/api/shared/twins', {
+  headers: {
+    'x-api-key': '${activeCurlKey.key}'
+  }
+});
+const data = await res.json();
+console.log(data.twins); // List of allocated models`}
+{snippetFormat === 'python' && `# Python Requests
+import requests
+
+url = "${getApiHost()}/api/shared/twins"
+headers = {"x-api-key": "${activeCurlKey.key}"}
+
+response = requests.get(url, headers=headers)
+print(response.json())`}
                 </pre>
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
-                  onClick={() => copyToClipboard(`curl -X GET "${getApiHost()}/api/shared/twins" \\\n  -H "x-api-key: ${activeCurlKey.key}"`, 'curl1')}
+                  onClick={() => {
+                    const text = snippetFormat === 'curl'
+                      ? `curl -X GET "${getApiHost()}/api/shared/twins" \\\n  -H "x-api-key: ${activeCurlKey.key}"`
+                      : snippetFormat === 'js'
+                      ? `const res = await fetch('${getApiHost()}/api/shared/twins', { headers: { 'x-api-key': '${activeCurlKey.key}' } });\nconst data = await res.json();\nconsole.log(data.twins);`
+                      : `import requests\nresponse = requests.get("${getApiHost()}/api/shared/twins", headers={"x-api-key": "${activeCurlKey.key}"})\nprint(response.json())`;
+                    copyToClipboard(text, 'snippet1');
+                  }}
                   style={{ position: 'absolute', top: 8, right: 8, fontSize: '0.72rem', padding: '3px 8px' }}
                 >
-                  {copiedId === 'curl1' ? 'Copied!' : 'Copy'}
+                  {copiedId === 'snippet1' ? 'Copied!' : 'Copy'}
                 </button>
               </div>
             </div>
 
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
-                2. Chat with an Allocated Model
-              </div>
-              <p style={{ margin: '0 0 8px 0', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                Interacts with the AI model. If the caller requests an unallocated twin, it automatically returns 403 Forbidden.
-              </p>
-              <div style={{ position: 'relative' }}>
-                <pre style={{ background: '#0f172a', color: '#f8fafc', padding: '12px 14px', borderRadius: 8, fontSize: '0.8rem', overflowX: 'auto', margin: 0 }}>
-{`curl -X POST "${getApiHost()}/api/shared/twins/chat" \\
+            {/* Step 2: Chat with Model */}
+            {(() => {
+              const sampleTwin = activeCurlKey.twins?.[0] || allTwins[0];
+              const sampleId = sampleTwin?._id || '<TWIN_ID>';
+              const sampleName = sampleTwin?.name || 'Digital Twin';
+
+              return (
+                <div style={{ marginBottom: 22 }}>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#10b981', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.74rem', fontWeight: 700 }}>2</span>
+                    Converse & Chat with Model ({sampleName})
+                  </div>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                    Sends a message to the AI persona. If the requested <code>twinId</code> is not allocated to this key, the endpoint returns <code>403 Forbidden</code>.
+                  </p>
+                  <div style={{ position: 'relative' }}>
+                    <pre style={{ background: '#0f172a', color: '#f8fafc', padding: '12px 14px', borderRadius: 8, fontSize: '0.78rem', overflowX: 'auto', margin: 0, lineHeight: 1.5 }}>
+{snippetFormat === 'curl' && `curl -X POST "${getApiHost()}/api/shared/twins/chat" \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: ${activeCurlKey.key}" \\
   -d '{
-    "twinId": "${activeCurlKey.twins?.[0]?._id || '<TWIN_ID>'}",
-    "message": "Hi, can you explain the typical onboarding process?"
+    "twinId": "${sampleId}",
+    "message": "Hello ${sampleName}, could you explain your core responsibilities and recent priorities?"
   }'`}
-                </pre>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => copyToClipboard(`curl -X POST "${getApiHost()}/api/shared/twins/chat" \\\n  -H "Content-Type: application/json" \\\n  -H "x-api-key: ${activeCurlKey.key}" \\\n  -d '{\n    "twinId": "${activeCurlKey.twins?.[0]?._id || '<TWIN_ID>'}",\n    "message": "Hi, can you explain the typical onboarding process?"\n  }'`, 'curl2')}
-                  style={{ position: 'absolute', top: 8, right: 8, fontSize: '0.72rem', padding: '3px 8px' }}
-                >
-                  {copiedId === 'curl2' ? 'Copied!' : 'Copy'}
-                </button>
+{snippetFormat === 'js' && `// JavaScript Fetch
+const res = await fetch('${getApiHost()}/api/shared/twins/chat', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': '${activeCurlKey.key}'
+  },
+  body: JSON.stringify({
+    twinId: '${sampleId}',
+    message: 'Hello ${sampleName}, could you explain your core responsibilities?'
+  })
+});
+const result = await res.json();
+console.log(result.reply);`}
+{snippetFormat === 'python' && `# Python Requests
+import requests
+
+url = "${getApiHost()}/api/shared/twins/chat"
+headers = {
+    "Content-Type": "application/json",
+    "x-api-key": "${activeCurlKey.key}"
+}
+payload = {
+    "twinId": "${sampleId}",
+    "message": "Hello ${sampleName}, could you explain your core responsibilities?"
+}
+
+response = requests.post(url, json=payload, headers=headers)
+print(response.json())`}
+                    </pre>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        const text = snippetFormat === 'curl'
+                          ? `curl -X POST "${getApiHost()}/api/shared/twins/chat" \\\n  -H "Content-Type: application/json" \\\n  -H "x-api-key: ${activeCurlKey.key}" \\\n  -d '{\n    "twinId": "${sampleId}",\n    "message": "Hello ${sampleName}, could you explain your core responsibilities?"\n  }'`
+                          : snippetFormat === 'js'
+                          ? `const res = await fetch('${getApiHost()}/api/shared/twins/chat', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json', 'x-api-key': '${activeCurlKey.key}' },\n  body: JSON.stringify({ twinId: '${sampleId}', message: 'Hello ${sampleName}' })\n});\nconst result = await res.json();\nconsole.log(result.reply);`
+                          : `import requests\nres = requests.post("${getApiHost()}/api/shared/twins/chat", json={"twinId": "${sampleId}", "message": "Hello"}, headers={"x-api-key": "${activeCurlKey.key}"})\nprint(res.json())`;
+                        copyToClipboard(text, 'snippet2');
+                      }}
+                      style={{ position: 'absolute', top: 8, right: 8, fontSize: '0.72rem', padding: '3px 8px' }}
+                    >
+                      {copiedId === 'snippet2' ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Authentication Methods Reference */}
+            <div style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: 8, padding: '12px 14px', marginBottom: 20 }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e40af', marginBottom: 6 }}>
+                Supported Authentication Methods
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10, fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                <div>
+                  <strong>1. Header (Recommended):</strong>
+                  <code style={{ display: 'block', background: 'var(--surface)', padding: '2px 6px', borderRadius: 4, marginTop: 2 }}>x-api-key: {activeCurlKey.key.slice(0, 16)}…</code>
+                </div>
+                <div>
+                  <strong>2. Bearer Token:</strong>
+                  <code style={{ display: 'block', background: 'var(--surface)', padding: '2px 6px', borderRadius: 4, marginTop: 2 }}>Authorization: Bearer {activeCurlKey.key.slice(0, 12)}…</code>
+                </div>
+                <div>
+                  <strong>3. URL Query Parameter:</strong>
+                  <code style={{ display: 'block', background: 'var(--surface)', padding: '2px 6px', borderRadius: 4, marginTop: 2 }}>?key={activeCurlKey.key.slice(0, 12)}…</code>
+                </div>
               </div>
             </div>
 
